@@ -1,7 +1,7 @@
-from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import permissions
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
+from carpool_app.models import User
 
 from carpool_app.serializers import UserSerializer, GroupSerializer
 
