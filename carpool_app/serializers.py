@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group
 from rest_framework import serializers
-from carpool_app.models import User
+from carpool_app.models import User, Trip
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,3 +17,20 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         """Meta class for GroupSerializer"""
         model = Group
         fields = ['url', 'name']
+
+
+class TripSerializer(serializers.HyperlinkedModelSerializer):
+    """Serializer for Trip model"""
+    class Meta:
+        """Meta class for TripSerializer"""
+        model = Trip
+        fields = ['id', 'date', 'car']
+
+
+class TripPartSerializer(serializers.HyperlinkedModelSerializer):
+    """Serializer for Trip model"""
+    class Meta:
+        """Meta class for TripSerializer"""
+        model = Trip
+        fields = ['id', 'departure_time', 'distance', 'duration', 'fee',
+                  'starting_point', 'ending_point', 'registrations', 'trip']
