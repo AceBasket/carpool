@@ -1,11 +1,11 @@
 from rest_framework import viewsets
 from rest_framework import permissions
+from rest_framework import generics
 from django.contrib.auth.models import Group
 from carpool_app.models import User, Trip, TripPart, TripRegistration
 from rest_framework.response import Response
 from carpool_app.serializers import UserSerializer, GroupSerializer, TripSerializer, TripPartSerializer, TripRegistrationSerializer
-from django.shortcuts import get_object_or_404
-# Create your views here.
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -35,6 +35,28 @@ class TripViewSet(viewsets.ModelViewSet):
     serializer_class = TripSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        # extra parameters added to the schema
+        parameters=[
+            OpenApiParameter(
+                name='source', description='A string corresponding to the wanted starting point', required=False, type=str),
+            OpenApiParameter(
+                name='destination', description='A string corresponding to the wanted ending point', required=False, type=str),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        if (request.GET.get('source') and request.GET.get('destination')):
+            return self.get_by_source_and_destination(request, request.GET.get('source'), request.GET.get('destination'))
+        return super().list(request, *args, **kwargs)
+
+    def get_by_source_and_destination(self, request, source, destination):
+        """
+        Get trip parts by source and destination
+        """
+        trips = Trip.objects.get_by_source_and_destination(source, destination)
+        serializer = TripSerializer(trips, many=True)
+        return Response(serializer.data)
+
 
 class TripPartViewSet(viewsets.ModelViewSet):
     """
@@ -54,3 +76,13 @@ class TripRegistrationViewSet(viewsets.ModelViewSet):
     queryset = TripRegistration.objects.all()
     serializer_class = TripRegistrationSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class TripList(generics.ListCreateAPIView):
+    queryset = Trip.objects.all()
+    serializer_class = TripSerializer
+
+
+class TripDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Trip.objects.all()
+    serializer_class = TripSerializer

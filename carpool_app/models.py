@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from .managers import UserManager
-# Create your models here.
+from .managers import UserManager, TripManager
 
 
 class User(AbstractUser):
@@ -43,7 +42,7 @@ class Trip(models.Model):
         """Meta class for Trip model"""
         unique_together = ('date', 'car')
 
-    objects = models.Manager()
+    objects = TripManager()
 
     def __str__(self):
         return str(self.id) + " on " + str(self.date)
