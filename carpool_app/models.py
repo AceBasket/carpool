@@ -74,6 +74,17 @@ class TripRegistration(models.Model):
 
     objects = models.Manager()
 
+    class Meta:
+        """Meta class for TripRegistration model"""
+        constraints = [
+            # limit trip registrations to number of seats in car
+            models.CheckConstraint(
+                check=models.Q(trip__car__num_passenger_seats__gte=models.Count(
+                    'trip__registrations')),
+                name='trip_registration_limit'
+            ),
+        ]
+
     def __str__(self):
         return str(self.id)
 
@@ -93,6 +104,14 @@ class TripPart(models.Model):
         Trip, on_delete=models.CASCADE, related_name='trip_parts')
 
     objects = models.Manager()
+
+    class Meta:
+        """Meta class for TripPart model"""
+        constraints = [
+            # prohibit trip parts belonging to same trip with same starting or ending points
+            models.CheckConstraint(check=models.Q(
+                trip__trip_parts__starting_point__ne=models.F('starting_point')) & models.Q(trip__trip_parts__ending_point_ne=models.F('ending_point')), name='trip_part_starting_point'),
+        ]
 
     def __str__(self):
         return self.starting_point + " to " + self.ending_point + " on " + str(self.trip)
