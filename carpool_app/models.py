@@ -25,8 +25,8 @@ class Car(models.Model):
     color = models.CharField(max_length=10, blank=True)
     num_passenger_seats = models.IntegerField()
     license_plate = models.CharField(max_length=10, unique=True)
-    owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='cars')
+    owner = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='car')
 
     def __str__(self):
         return str(self.license_plate)
@@ -38,6 +38,10 @@ class Trip(models.Model):
     date = models.DateField()
     car = models.ForeignKey(
         Car, on_delete=models.CASCADE, related_name='trips')
+
+    class Meta:
+        """Meta class for Trip model"""
+        unique_together = ('date', 'car')
 
     objects = models.Manager()
 
@@ -69,6 +73,8 @@ class TripRegistration(models.Model):
     trip = models.ForeignKey(
         Trip, on_delete=models.CASCADE, related_name='registrations')
 
+    objects = models.Manager()
+
     def __str__(self):
         return str(self.id)
 
@@ -86,6 +92,8 @@ class TripPart(models.Model):
         TripRegistration, related_name='trip_parts')
     trip = models.ForeignKey(
         Trip, on_delete=models.CASCADE, related_name='trip_parts')
+
+    objects = models.Manager()
 
     def __str__(self):
         return self.starting_point + " to " + self.ending_point + " on " + str(self.trip)

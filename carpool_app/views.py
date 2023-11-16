@@ -1,9 +1,9 @@
 from rest_framework import viewsets
 from rest_framework import permissions
 from django.contrib.auth.models import Group
-from carpool_app.models import User, Trip
+from carpool_app.models import User, Trip, TripPart, TripRegistration
 from rest_framework.response import Response
-from carpool_app.serializers import UserSerializer, GroupSerializer, TripSerializer
+from carpool_app.serializers import UserSerializer, GroupSerializer, TripSerializer, TripPartSerializer, TripRegistrationSerializer
 from django.shortcuts import get_object_or_404
 # Create your views here.
 
@@ -33,4 +33,24 @@ class TripViewSet(viewsets.ModelViewSet):
 
     queryset = Trip.objects.all()
     serializer_class = TripSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class TripPartViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows trip parts to be viewed or edited.
+    """
+
+    queryset = TripPart.objects.all()
+    serializer_class = TripPartSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class TripRegistrationViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows trip registrations to be viewed or edited.
+    """
+
+    queryset = TripRegistration.objects.all()
+    serializer_class = TripRegistrationSerializer
     permission_classes = [permissions.IsAuthenticated]
