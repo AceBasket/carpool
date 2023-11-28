@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('', include('carpool_app.urls')),
+    path('', include('user.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # Optional UI:
     path('api/schema/swagger-ui/',
