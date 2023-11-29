@@ -19,3 +19,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def is_2fa_enabled(self):
+        """Returns True if 2FA is enabled for the user"""
+        return self.otp_enabled

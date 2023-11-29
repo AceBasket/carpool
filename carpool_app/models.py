@@ -42,9 +42,9 @@ class Review(models.Model):
     score = models.IntegerField()
     content = models.CharField(max_length=100, blank=True)
     reviewer = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviewer_id')
+        User, on_delete=models.CASCADE, related_name='reviews_emited')
     reviewee = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviewee_id')
+        User, on_delete=models.CASCADE, related_name='reviews_received')
     trip = models.ForeignKey(
         Trip, on_delete=models.CASCADE, related_name='reviews')
 

@@ -5,6 +5,30 @@ from carpool_app.models import Trip, TripPart, TripRegistration, Review, Car
 from carpool_app.serializers import TripSerializer, TripPartSerializer, TripRegistrationSerializer, ReviewSerializer, CarSerializer
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from user.models import User
+
+
+class IsDriver(permissions.BasePermission):
+    """
+    Custom permission to only allow drivers to create trips and trip parts.
+    """
+
+    def has_permission(self, request, view):
+        return request.user.car.exists()
+
+
+class IsTripOwnedBy(permissions.BasePermission):
+    """
+    Custom permission to only allow drivers that created the trip to create trip parts.
+    """
+
+    def has_permission(self, request, view):
+        trip_id = view.kwargs['pk']
+        try:
+            trip = Trip.objects.get(pk=trip_id)
+        except Trip.DoesNotExist:
+            return False
+        return request.user.car == trip.car
 
 
 class TripViewSet(viewsets.ModelViewSet):
@@ -57,6 +81,29 @@ class TripRegistrationViewSet(viewsets.ModelViewSet):
     queryset = TripRegistration.objects.all()
     serializer_class = TripRegistrationSerializer
     # permission_classes = [permissions.IsAuthenticated]
+
+
+class IsAllowedToReview(permissions.BasePermission):
+    """
+    Custom permission to only allow users that have been in a trip with the user to review them.
+    """
+
+    def has_permission(self, request, view):
+        reviewed_user_id = view.kwargs['reviewee']
+        reviewed_user = User.objects.get(pk=reviewed_user_id)
+        trip_id = view.kwargs['trip']
+        trip = Trip.objects.get(pk=trip_id)
+        # can't review yourself and need to have been on the trip (as passenger or driver) + same conditions for user reviewed
+        return request.user != reviewed_user and (request.user in trip.passengers.all() or request.user == trip.car.driver) and (reviewed_user in trip.passengers.all() or reviewed_user == trip.car.driver)
+
+
+class IsReviewer(permissions.BasePermission):
+    """
+    Custom permission to only allow users that have created a review to view it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return obj.reviewer == request.user
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

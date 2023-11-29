@@ -1,12 +1,12 @@
 from rest_framework.response import Response
-from rest_framework import status, generics, viewsets, permissions
+from rest_framework import status, generics, viewsets
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group
 import pyotp
+from rest_framework_simplejwt.tokens import RefreshToken
 from user.serializers import UserSerializer, GroupSerializer
 from user.models import User
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework.decorators import action
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -118,7 +118,9 @@ class VerifyOTP(generics.GenericAPIView):
         user.save()
         serializer = self.serializer_class(user)
 
-        return Response({'otp_verified': True, "user": serializer.data})
+        refresh_token = RefreshToken.for_user(user)
+
+        return Response({'otp_verified': True, "user": serializer.data, "token": {"refresh": str(refresh_token), "access": str(refresh_token.access_token)}})
 
 
 class ValidateOTP(generics.GenericAPIView):
@@ -141,7 +143,9 @@ class ValidateOTP(generics.GenericAPIView):
         if not totp.verify(otp_token, valid_window=1):
             return Response({"status": "fail", "message": message}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'otp_valid': True})
+        refresh_token = RefreshToken.for_user(user)
+
+        return Response({'otp_valid': True, "token": {"refresh": str(refresh_token), "access": str(refresh_token.access_token)}})
 
 
 class DisableOTP(generics.GenericAPIView):
