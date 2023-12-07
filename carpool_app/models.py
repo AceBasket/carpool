@@ -30,7 +30,7 @@ class Trip(models.Model):
         """Meta class for Trip model"""
         unique_together = ('date', 'car')
 
-    objects = TripManager()
+    objects = models.Manager()
 
     def __str__(self):
         return str(self.id) + " on " + str(self.date)
@@ -48,7 +48,7 @@ class Review(models.Model):
     trip = models.ForeignKey(
         Trip, on_delete=models.CASCADE, related_name='reviews')
 
-    objects = ReviewManager()
+    objects = models.Manager()
 
     def __str__(self):
         return str(self.id) + " " + str(self.score) + " from " + str(self.reviewer) + " to " + str(self.reviewee) + " on " + str(self.trip)

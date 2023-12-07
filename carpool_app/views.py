@@ -1,6 +1,5 @@
 from rest_framework import viewsets
 from rest_framework import permissions
-from rest_framework import generics
 from carpool_app.models import Trip, TripPart, TripRegistration, Review, Car
 from carpool_app.serializers import TripSerializer, TripPartSerializer, TripRegistrationSerializer, ReviewSerializer, CarSerializer
 from rest_framework.response import Response
@@ -51,16 +50,22 @@ class TripViewSet(viewsets.ModelViewSet):
     )
     def list(self, request, *args, **kwargs):
         if (request.GET.get('source') and request.GET.get('destination')):
-            return self.get_by_source_and_destination(request, request.GET.get('source'), request.GET.get('destination'))
+            source = request.GET.get('source')
+            destination = request.GET.get('destination')
+            trips = self.get_by_source_and_destination(source, destination)
+            return Response(TripSerializer(trips, many=True).data)
         return super().list(request, *args, **kwargs)
 
-    def get_by_source_and_destination(self, request, source, destination):
+    def get_by_source_and_destination(self, source=None, destination=None):
         """
         Get trip parts by source and destination
         """
-        trips = Trip.objects.get_by_source_and_destination(source, destination)
-        serializer = TripSerializer(trips, many=True)
-        return Response(serializer.data)
+        trips = Trip.objects.prefetch_related('trip_parts')
+        if source:
+            trips = trips.filter(trip_parts__starting_point=source)
+        if destination:
+            trips = trips.filter(trip_parts__ending_point=destination)
+        return trips
 
 
 class TripPartViewSet(viewsets.ModelViewSet):

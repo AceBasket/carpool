@@ -2,30 +2,24 @@ from rest_framework import serializers
 from carpool_app.models import Trip, TripPart, TripRegistration, Review, Car
 
 
-class TripSerializer(serializers.ModelSerializer):
-    """Serializer for Trip model"""
-
-    class Meta:
-        """Meta class for TripSerializer"""
-        model = Trip
-        fields = ['id', 'date', 'car']
-
-
 class TripPartSerializer(serializers.ModelSerializer):
     """Serializer for TripParts model"""
-    # trip = TripSerializer()
-
     class Meta:
         """Meta class for TripPartsSerializer"""
         model = TripPart
         fields = ['id', 'departure_time', 'distance', 'duration', 'fee',
                   'starting_point', 'ending_point', 'registrations', 'trip']
 
-    # def create(self, validated_data):
-    #     trip_data = validated_data.pop('trip')
-    #     trip = Trip.objects.create(**trip_data)
-    #     trip_part = TripPart.objects.create(trip=trip, **validated_data)
-    #     return trip_part
+
+class TripSerializer(serializers.ModelSerializer):
+    """Serializer for Trip model"""
+    trip_parts = TripPartSerializer(read_only=True, many=True)
+    fee = serializers.IntegerField(required=False)
+
+    class Meta:
+        """Meta class for TripSerializer"""
+        model = Trip
+        fields = ['id', 'date', 'car', 'trip_parts']
 
 
 class TripRegistrationSerializer(serializers.ModelSerializer):
