@@ -54,19 +54,3 @@ class TripManager(models.Manager):
         """
         return super().get_queryset().filter(Q(trip_parts__starting_point=source) & Q(trip_parts__ending_point=destination))
 
-class reviewManager(models.Manager):
-    """
-    Custom review model manager
-    """
-
-    def get_queryset(self):
-        """
-        Fetch related trip parts
-        """
-        return super().get_queryset().prefetch_related("reviewer_id")
-
-    def get_by_source_and_destination(self, source=None, destination=None):
-        """
-        Fetch trips by source and destination
-        """
-        return super().get_queryset().filter(Q(trip_parts__starting_point=source) & Q(trip_parts__ending_point=destination))

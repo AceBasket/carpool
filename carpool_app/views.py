@@ -2,11 +2,11 @@ from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import generics
 from django.contrib.auth.models import Group
-from carpool_app.models import User, Trip, TripPart, TripRegistration, Review, Car
+from carpool_app.models import User, Trip, TripPart, TripRegistration, Car
 from rest_framework.response import Response
-from carpool_app.serializers import UserSerializer, GroupSerializer, TripSerializer, TripPartSerializer, TripRegistrationSerializer, ReviewSerializer, CarSerializer
+from carpool_app.serializers import UserSerializer, GroupSerializer, TripSerializer, TripPartSerializer, TripRegistrationSerializer, CarSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-
+from rest_framework import status
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -16,7 +16,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-
+   
 class GroupViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -87,22 +87,7 @@ class TripDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Trip.objects.all()
     serializer_class = TripSerializer
 
-class ReviewViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows reviews to be viewed or edited.
-    """
 
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-class ReviewList(generics.ListCreateAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-
-class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
 
 class CarViewSet(viewsets.ModelViewSet):
     """

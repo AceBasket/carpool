@@ -48,22 +48,6 @@ class Trip(models.Model):
         return str(self.id) + " on " + str(self.date)
 
 
-class Review(models.Model):
-    """Review model"""
-    id = models.AutoField(primary_key=True)
-    score = models.IntegerField()
-    content = models.CharField(max_length=100, blank=True)
-    reviewer = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviewer_id')
-    reviewee = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviewee_id')
-    trip = models.ForeignKey(
-        Trip, on_delete=models.CASCADE, related_name='reviews')
-
-
-    def __str__(self):
-        return str(self.id) + " " + str(self.score) + " from " + str(self.reviewer) + " to " + str(self.reviewee) + " on " + str(self.trip)
-
 
 class TripRegistration(models.Model):
     """Sign up model"""

@@ -8,7 +8,6 @@ router.register(r'groups', views.GroupViewSet)
 router.register(r'trips', views.TripViewSet)
 router.register(r'trip-parts', views.TripPartViewSet)
 router.register(r'registrations', views.TripRegistrationViewSet)
-router.register(r'reviews', views.ReviewViewSet)
 router.register(r'cars', views.CarViewSet)
 urlpatterns = [
     path('', include(router.urls)),
