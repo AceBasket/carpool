@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from carpool_app.serializers import UserSerializer, GroupSerializer, TripSerializer, TripPartSerializer, TripRegistrationSerializer, CarSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
-
+from .producer import publish
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -56,7 +56,11 @@ class TripViewSet(viewsets.ModelViewSet):
         trips = Trip.objects.get_by_source_and_destination(source, destination)
         serializer = TripSerializer(trips, many=True)
         return Response(serializer.data)
-
+    def destroy(self, request, pk = None):
+        trip = Trip.objects.get(id=pk)
+        trip.delete()
+        publish('trip_deleted', pk)
+        return Response('trip deleted')
 
 class TripPartViewSet(viewsets.ModelViewSet):
     """
