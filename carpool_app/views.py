@@ -12,10 +12,14 @@ class IsDriver(permissions.BasePermission):
     """
     Custom permission to only allow drivers to create trips and trip parts.
     """
+    message = "You don't have a car"
 
     def has_permission(self, request, view):
         if view.action == 'create':
-            return request.user.car.exists()
+            try:
+                car = request.user.car
+            except Car.DoesNotExist:
+                return False
         return True
 
 
@@ -23,12 +27,13 @@ class IsTripOwnedBy(permissions.BasePermission):
     """
     Custom permission to only allow drivers that created the trip to create trip parts.
     """
+    message = "You don't own this trip"
 
     def has_permission(self, request, view):
         if view.action == 'create':
-            trip_id = view.kwargs['pk']
+            trip_slug = view.kwargs['slug']
             try:
-                trip = Trip.objects.get(pk=trip_id)
+                trip = Trip.objects.get(slug=trip_slug)
             except Trip.DoesNotExist:
                 return False
             return request.user.car == trip.car
@@ -41,7 +46,7 @@ class TripViewSet(viewsets.ModelViewSet):
     API endpoint that allows trips to be viewed or edited.
     """
 
-    queryset = Trip.objects.all()
+    queryset = Trip.objects.all().order_by('date')
     serializer_class = TripSerializer
     permission_classes = [permissions.IsAuthenticated, IsDriver]
     lookup_field = 'slug'
@@ -74,9 +79,13 @@ class TripViewSet(viewsets.ModelViewSet):
             trips = trips.filter(trip_parts__ending_point=destination)
         return trips
 
-    def destroy(self, request, pk=None):
-        publish('trip_deleted', pk)
-        return super().destroy(request, pk)
+    def destroy(self, request, *args, **kwargs):
+        try:
+            pk = Trip.objects.get(slug=kwargs['slug']).pk
+            publish('trip_deleted', str(pk))
+        except Trip.DoesNotExist:
+            pass
+        return super().destroy(request, *args, **kwargs)
 
 
 class TripPartViewSet(viewsets.ModelViewSet):
@@ -84,7 +93,7 @@ class TripPartViewSet(viewsets.ModelViewSet):
     API endpoint that allows trip parts to be viewed or edited.
     """
 
-    queryset = TripPart.objects.all()
+    queryset = TripPart.objects.all().order_by('trip__date', 'departure_time')
     serializer_class = TripPartSerializer
     permission_classes = [permissions.IsAuthenticated, IsDriver, IsTripOwnedBy]
     lookup_field = 'slug'
@@ -95,7 +104,7 @@ class TripRegistrationViewSet(viewsets.ModelViewSet):
     API endpoint that allows trip registrations to be viewed or edited.
     """
 
-    queryset = TripRegistration.objects.all()
+    queryset = TripRegistration.objects.all().order_by('trip__date')
     serializer_class = TripRegistrationSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'slug'
@@ -119,9 +128,10 @@ class IsCarOwner(permissions.BasePermission):
     """
     Custom permission to only allow users that own a car to manage that car.
     """
+    message = "You don't own this car"
 
     def has_object_permission(self, request, view, obj):
-        return request.user.car == obj
+        return obj.owner == request.user
 
 
 class CarViewSet(viewsets.ModelViewSet):
@@ -129,7 +139,7 @@ class CarViewSet(viewsets.ModelViewSet):
     API endpoint that allows cars to be viewed or edited.
     """
 
-    queryset = Car.objects.all()
+    queryset = Car.objects.all().order_by('license_plate')
     serializer_class = CarSerializer
     permission_classes = [permissions.IsAuthenticated, IsCarOwner]
     lookup_field = 'slug'
