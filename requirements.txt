@@ -4,3 +4,6 @@ django-filter
 django-rest-swagger
 drf-spectacular[sidecar]
 django-extensions
+pyotp
+django-cors-headers
+djangorestframework-simplejwt

@@ -18,13 +18,11 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-
-# Wire up our API using automatic URL routing.
-# Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('', include('carpool_app.urls')),
+    path('', include('user.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # Optional UI:
     path('api/schema/swagger-ui/',

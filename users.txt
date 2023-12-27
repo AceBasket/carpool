@@ -1,3 +1,8 @@
 admin user:
     email = admin@test.com
-    password = admin
+    password = test1234
+
+user 1:
+    email = acebasket02@gmail.com
+    password = test1234
+    otp_secret = KGMANCAINORGNHTYJSXJDVRXHBEG365X

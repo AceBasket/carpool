@@ -1,20 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from .managers import UserManager, TripManager
-
-
-class User(AbstractUser):
-    """Custom user model"""
-    username = None
-    email = models.EmailField(("email address"), unique=True)
-
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
-
-    objects = UserManager()
-
-    def __str__(self):
-        return self.email
+from user.models import User
 
 
 class Car(models.Model):
@@ -26,6 +11,8 @@ class Car(models.Model):
     license_plate = models.CharField(max_length=10, unique=True)
     owner = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name='car')
+
+    objects = models.Manager()
 
     def __str__(self):
         return str(self.license_plate)
@@ -42,7 +29,7 @@ class Trip(models.Model):
         """Meta class for Trip model"""
         unique_together = ('date', 'car')
 
-    objects = TripManager()
+    objects = models.Manager()
 
     def __str__(self):
         return str(self.id) + " on " + str(self.date)
@@ -59,16 +46,16 @@ class TripRegistration(models.Model):
 
     objects = models.Manager()
 
-    class Meta:
-        """Meta class for TripRegistration model"""
-        constraints = [
-            # limit trip registrations to number of seats in car
-            models.CheckConstraint(
-                check=models.Q(trip__car__num_passenger_seats__gte=models.Count(
-                    'trip__registrations')),
-                name='trip_registration_limit'
-            ),
-        ]
+    # class Meta:
+    #     """Meta class for TripRegistration model"""
+    #     constraints = [
+    #         # limit trip registrations to number of seats in car
+    #         models.CheckConstraint(
+    #             check=models.Q(trip__car__num_passenger_seats__gte=models.Count(
+    #                 'trip__registrations')),
+    #             name='trip_registration_limit'
+    #         ),
+    #     ]
 
     def __str__(self):
         return str(self.id)
@@ -84,19 +71,19 @@ class TripPart(models.Model):
     starting_point = models.CharField(max_length=20)
     ending_point = models.CharField(max_length=20)
     registrations = models.ManyToManyField(
-        TripRegistration, related_name='trip_parts')
+        TripRegistration, related_name='trip_parts', blank=True)
     trip = models.ForeignKey(
         Trip, on_delete=models.CASCADE, related_name='trip_parts')
 
     objects = models.Manager()
 
-    class Meta:
-        """Meta class for TripPart model"""
-        constraints = [
-            # prohibit trip parts belonging to same trip with same starting or ending points
-            models.CheckConstraint(check=models.Q(
-                trip__trip_parts__starting_point__ne=models.F('starting_point')) & models.Q(trip__trip_parts__ending_point_ne=models.F('ending_point')), name='trip_part_starting_point'),
-        ]
+    # class Meta:
+    #     """Meta class for TripPart model"""
+    #     constraints = [
+    #         # prohibit trip parts belonging to same trip with same starting or ending points
+    #         models.CheckConstraint(check=models.Q(
+    #             trip__trip_parts__starting_point__ne=models.F('starting_point')) & models.Q(trip__trip_parts__ending_point_ne=models.F('ending_point')), name='trip_part_starting_point'),
+    #     ]
 
     def __str__(self):
         return self.starting_point + " to " + self.ending_point + " on " + str(self.trip)

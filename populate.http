@@ -1,0 +1,175 @@
+# @name createUser1
+POST http://127.0.0.1:8000/auth/register HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "email": "sarah.mainguet@bordeaux-inp.fr",
+  "password": "test1234"
+}
+
+###
+
+# @name createUser2
+POST http://127.0.0.1:8000/auth/register HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "email": "sarah@mainguet.fr",
+  "password": "test1234"
+}
+
+###
+
+@user1Id = 5
+@user2Id = 6
+
+# @name createCar1
+POST http://127.0.0.1:8000/cars/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "license_plate": "GH378RT",
+  "owner": "{{user2Id}}",
+  "num_passenger_seats": 3
+}
+
+###
+
+@car1Id = {{createCar1.response.body.id}}
+
+# @name createTrip1
+POST http://127.0.0.1:8000/trips/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "car": "{{car1Id}}",
+  "date": "2023-11-28"
+}
+
+###
+
+@trip1Id = {{createTrip1.response.body.id}}
+
+# @name createTrip2
+POST http://127.0.0.1:8000/trips/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "car": "{{car1Id}}",
+  "date": "2023-12-28"
+}
+
+###
+
+@trip2Id = {{createTrip2.response.body.id}}
+
+# @name createTrip3
+POST http://127.0.0.1:8000/trips/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "car": "{{car1Id}}",
+  "date": "2023-01-28"
+}
+
+###
+
+@trip3Id = {{createTrip3.response.body.id}}
+
+# @name createTrip1_tripPart1
+POST http://127.0.0.1:8000/trip-parts/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "departure_time": "12:45",
+  "distance": 10,
+  "duration": 30,
+  "fee": 5,
+  "starting_point": "A",
+  "ending_point": "B",
+  "trip": "{{trip1Id}}"
+}
+
+###
+
+# @name createTrip1_tripPart2
+POST http://127.0.0.1:8000/trip-parts/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "departure_time": "13:45",
+  "distance": 10,
+  "duration": 30,
+  "fee": 5,
+  "starting_point": "B",
+  "ending_point": "C",
+  "trip": "{{trip1Id}}"
+}
+
+###
+
+# @name createTrip1_tripPart3
+POST http://127.0.0.1:8000/trip-parts/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "departure_time": "14:45",
+  "distance": 10,
+  "duration": 30,
+  "fee": 5,
+  "starting_point": "C",
+  "ending_point": "D",
+  "trip": "{{trip1Id}}"
+}
+
+###
+
+# @name createTrip1_tripPart4
+POST http://127.0.0.1:8000/trip-parts/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "departure_time": "15:45",
+  "distance": 10,
+  "duration": 30,
+  "fee": 5,
+  "starting_point": "D",
+  "ending_point": "E",
+  "trip": "{{trip1Id}}"
+}
+
+###
+
+# @name createTrip1_registration1
+POST http://127.0.0.1:8000/registrations/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "user": "{{user1Id}}",
+  "trip": "{{trip1Id}}"
+}
+
+###
+
+# @name createTrip1_registration2
+POST http://127.0.0.1:8000/registrations/ HTTP/1.1
+accept: application/json
+Content-Type: application/json
+
+{
+  "user": "{{user2Id}}",
+  "trip": "{{trip1Id}}"
+}
+
+###
