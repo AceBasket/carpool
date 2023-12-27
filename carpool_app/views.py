@@ -1,25 +1,14 @@
 from rest_framework import viewsets
 from rest_framework import permissions
-<<<<<<< HEAD
-from rest_framework import generics
-from django.contrib.auth.models import Group
-from carpool_app.models import User, Trip, TripPart, TripRegistration, Car
-from rest_framework.response import Response
-from carpool_app.serializers import UserSerializer, GroupSerializer, TripSerializer, TripPartSerializer, TripRegistrationSerializer, CarSerializer
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import status
-from .producer import publish
-class UserViewSet(viewsets.ModelViewSet):
-=======
-from carpool_app.models import Trip, TripPart, TripRegistration, Review, Car
-from carpool_app.serializers import TripSerializer, TripPartSerializer, TripRegistrationSerializer, ReviewSerializer, CarSerializer
+from carpool_app.models import Trip, TripPart, TripRegistration, Car
+from carpool_app.producer import publish
+from carpool_app.serializers import TripSerializer, TripPartSerializer, TripRegistrationSerializer, CarSerializer
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from user.models import User
 
 
 class IsDriver(permissions.BasePermission):
->>>>>>> be8f80d3dbde7f414e5ffb0e8f655be06e16cf35
     """
     Custom permission to only allow drivers to create trips and trip parts.
     """
@@ -27,13 +16,8 @@ class IsDriver(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.car.exists()
 
-<<<<<<< HEAD
-   
-class GroupViewSet(viewsets.ModelViewSet):
-=======
 
 class IsTripOwnedBy(permissions.BasePermission):
->>>>>>> be8f80d3dbde7f414e5ffb0e8f655be06e16cf35
     """
     Custom permission to only allow drivers that created the trip to create trip parts.
     """
@@ -83,12 +67,10 @@ class TripViewSet(viewsets.ModelViewSet):
         if destination:
             trips = trips.filter(trip_parts__ending_point=destination)
         return trips
-    
-    def destroy(self, request, pk = None):
-        trip = Trip.objects.get(id=pk)
-        trip.delete()
+
+    def destroy(self, request, pk=None):
         publish('trip_deleted', pk)
-        return Response('trip deleted')
+        return super().destroy(request, pk)
 
 
 class TripPartViewSet(viewsets.ModelViewSet):

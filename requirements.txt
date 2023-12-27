@@ -7,3 +7,4 @@ django-extensions
 pyotp
 django-cors-headers
 djangorestframework-simplejwt
+pika

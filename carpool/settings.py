@@ -136,6 +136,7 @@ SPECTACULAR_SETTINGS = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'SIGNING_KEY': "w3q%wwl$hu&jveli_1t+z&(q%ybf$t&%#i18o4rhcx0l)m+tkn",
 }
 
 # Internationalization

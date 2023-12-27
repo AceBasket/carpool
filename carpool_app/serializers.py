@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import Group
 from carpool_app.models import User, Trip, TripPart, TripRegistration, Car
 
 
@@ -53,7 +54,6 @@ class TripRegistrationSerializer(serializers.ModelSerializer):
         """Meta class for TripRegistrationSerializer"""
         model = TripRegistration
         fields = ['id', 'user', 'trip']
-
 
 
 class CarSerializer(serializers.ModelSerializer):

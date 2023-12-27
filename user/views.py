@@ -68,15 +68,6 @@ class GenerateOTP(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
-    # @extend_schema(
-    #     # extra parameters added to the schema
-    #     parameters=[
-    #         OpenApiParameter(
-    #             name='user_id', required=True, type=str),
-    #         OpenApiParameter(
-    #             name='email', required=True, type=str),
-    #     ],
-    # )
     def post(self, request):
         data = request.data
         user_id = data.get('user_id', None)
