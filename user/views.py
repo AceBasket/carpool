@@ -1,30 +1,10 @@
 from rest_framework.response import Response
-from rest_framework import status, generics, viewsets
-from rest_framework.authtoken.models import Token
+from rest_framework import status, generics
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import Group
 import pyotp
 from rest_framework_simplejwt.tokens import RefreshToken
-from user.serializers import UserSerializer, GroupSerializer
+from user.serializers import UserSerializer
 from user.models import User
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    # permission_classes = [permissions.IsAuthenticated]
-
-
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    # permission_classes = [permissions.IsAuthenticated]
 
 
 class RegisterView(generics.GenericAPIView):

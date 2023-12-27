@@ -1,31 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth.models import Group
-from carpool_app.models import User, Trip, TripPart, TripRegistration, Car
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User model"""
-    class Meta:
-        """Meta class for UserSerializer"""
-        model = User
-        fields = ['id', 'email', 'groups']
-
-
-class GroupSerializer(serializers.ModelSerializer):
-    """Serializer for Group model"""
-    class Meta:
-        """Meta class for GroupSerializer"""
-        model = Group
-        fields = ['url', 'name']
-
-
-class TripSerializer(serializers.ModelSerializer):
-    """Serializer for Trip model"""
-
-    class Meta:
-        """Meta class for TripSerializer"""
-        model = Trip
-        fields = ['id', 'date', 'car']
+from carpool_app.models import Trip, TripPart, TripRegistration, Car
 
 
 class TripPartSerializer(serializers.ModelSerializer):
@@ -33,8 +7,9 @@ class TripPartSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta class for TripPartsSerializer"""
         model = TripPart
-        fields = ['id', 'departure_time', 'distance', 'duration', 'fee',
-                  'starting_point', 'ending_point', 'registrations', 'trip']
+        exclude = ['slug']
+        lookup_field = 'slug'
+        # fields = '__all__'
 
 
 class TripSerializer(serializers.ModelSerializer):
@@ -44,7 +19,9 @@ class TripSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta class for TripSerializer"""
         model = Trip
-        fields = ['id', 'date', 'car', 'trip_parts']
+        # fields = '__all__'
+        exclude = ['slug']
+        lookup_field = 'slug'
 
 
 class TripRegistrationSerializer(serializers.ModelSerializer):
@@ -53,14 +30,21 @@ class TripRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta class for TripRegistrationSerializer"""
         model = TripRegistration
-        fields = ['id', 'user', 'trip']
+        # fields = '__all__'
+        exclude = ['slug']
+        lookup_field = 'slug'
 
 
 class CarSerializer(serializers.ModelSerializer):
     """Serializer for Car model"""
 
+    def create(self, validated_data):
+        # slugify license plate
+        validated_data['slug'] = validated_data['license_plate']
+        return super().create(validated_data)
+
     class Meta:
         """Meta class for CarSerializer"""
         model = Car
-        fields = ['id', 'type', 'color', 'license_plate',
-                  'owner', 'num_passenger_seats']
+        exclude = ['slug']
+        lookup_field = 'slug'

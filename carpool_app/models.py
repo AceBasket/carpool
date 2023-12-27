@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from user.models import User
 
 
@@ -11,11 +12,13 @@ class Car(models.Model):
     license_plate = models.CharField(max_length=10, unique=True)
     owner = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name='car')
-
-    objects = models.Manager()
+    slug = models.SlugField(null=False, blank=False, unique=True)
 
     def __str__(self):
-        return str(self.license_plate)
+        return f"Car {self.license_plate}"
+
+    def get_absolute_url(self):
+        return reverse('car_detail', kwargs={'slug': self.slug})
 
 
 class Trip(models.Model):
@@ -24,16 +27,18 @@ class Trip(models.Model):
     date = models.DateField()
     car = models.ForeignKey(
         Car, on_delete=models.CASCADE, related_name='trips')
+    slug = models.SlugField(null=False, blank=False,
+                            unique=True, max_length=255)
 
     class Meta:
         """Meta class for Trip model"""
         unique_together = ('date', 'car')
 
-    objects = models.Manager()
-
     def __str__(self):
-        return str(self.id) + " on " + str(self.date)
+        return f" Trip with {self.car} on {self.date}"
 
+    def get_absolute_url(self):
+        return reverse('trip_detail', kwargs={'slug': self.slug})
 
 
 class TripRegistration(models.Model):
@@ -43,22 +48,14 @@ class TripRegistration(models.Model):
         User, on_delete=models.CASCADE, related_name='registrations')
     trip = models.ForeignKey(
         Trip, on_delete=models.CASCADE, related_name='registrations')
-
-    objects = models.Manager()
-
-    # class Meta:
-    #     """Meta class for TripRegistration model"""
-    #     constraints = [
-    #         # limit trip registrations to number of seats in car
-    #         models.CheckConstraint(
-    #             check=models.Q(trip__car__num_passenger_seats__gte=models.Count(
-    #                 'trip__registrations')),
-    #             name='trip_registration_limit'
-    #         ),
-    #     ]
+    slug = models.SlugField(null=False, blank=False,
+                            unique=True, max_length=255)
 
     def __str__(self):
-        return str(self.id)
+        return f"Registration of user {self.user} for ({self.trip})"
+
+    def get_absolute_url(self):
+        return reverse('trip_registration_detail', kwargs={'slug': self.slug})
 
 
 class TripPart(models.Model):
@@ -74,16 +71,11 @@ class TripPart(models.Model):
         TripRegistration, related_name='trip_parts', blank=True)
     trip = models.ForeignKey(
         Trip, on_delete=models.CASCADE, related_name='trip_parts')
-
-    objects = models.Manager()
-
-    # class Meta:
-    #     """Meta class for TripPart model"""
-    #     constraints = [
-    #         # prohibit trip parts belonging to same trip with same starting or ending points
-    #         models.CheckConstraint(check=models.Q(
-    #             trip__trip_parts__starting_point__ne=models.F('starting_point')) & models.Q(trip__trip_parts__ending_point_ne=models.F('ending_point')), name='trip_part_starting_point'),
-    #     ]
+    slug = models.SlugField(null=False, blank=False,
+                            unique=True, max_length=255)
 
     def __str__(self):
-        return self.starting_point + " to " + self.ending_point + " on " + str(self.trip)
+        return f"Trip part from {self.starting_point} to {self.ending_point} of {self.trip}"
+
+    def get_absolute_url(self):
+        return reverse('trip_part_detail', kwargs={'slug': self.slug})

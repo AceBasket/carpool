@@ -14,7 +14,9 @@ class IsDriver(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user.car.exists()
+        if view.action == 'create':
+            return request.user.car.exists()
+        return True
 
 
 class IsTripOwnedBy(permissions.BasePermission):
@@ -23,12 +25,15 @@ class IsTripOwnedBy(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        trip_id = view.kwargs['pk']
-        try:
-            trip = Trip.objects.get(pk=trip_id)
-        except Trip.DoesNotExist:
-            return False
-        return request.user.car == trip.car
+        if view.action == 'create':
+            trip_id = view.kwargs['pk']
+            try:
+                trip = Trip.objects.get(pk=trip_id)
+            except Trip.DoesNotExist:
+                return False
+            return request.user.car == trip.car
+        else:
+            return True
 
 
 class TripViewSet(viewsets.ModelViewSet):
@@ -38,7 +43,8 @@ class TripViewSet(viewsets.ModelViewSet):
 
     queryset = Trip.objects.all()
     serializer_class = TripSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsDriver]
+    lookup_field = 'slug'
 
     @extend_schema(
         # extra parameters added to the schema
@@ -80,7 +86,8 @@ class TripPartViewSet(viewsets.ModelViewSet):
 
     queryset = TripPart.objects.all()
     serializer_class = TripPartSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsDriver, IsTripOwnedBy]
+    lookup_field = 'slug'
 
 
 class TripRegistrationViewSet(viewsets.ModelViewSet):
@@ -90,21 +97,31 @@ class TripRegistrationViewSet(viewsets.ModelViewSet):
 
     queryset = TripRegistration.objects.all()
     serializer_class = TripRegistrationSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'slug'
 
 
-class IsAllowedToReview(permissions.BasePermission):
+# class IsAllowedToReview(permissions.BasePermission):
+#     """
+#     Custom permission to only allow users that have been in a trip with the user to review them.
+#     """
+
+#     def has_permission(self, request, view):
+#         reviewed_user_id = view.kwargs['reviewee']
+#         reviewed_user = User.objects.get(pk=reviewed_user_id)
+#         trip_id = view.kwargs['trip']
+#         trip = Trip.objects.get(pk=trip_id)
+#         # can't review yourself and need to have been on the trip (as passenger or driver) + same conditions for user reviewed
+#         return request.user != reviewed_user and (request.user in trip.passengers.all() or request.user == trip.car.driver) and (reviewed_user in trip.passengers.all() or reviewed_user == trip.car.driver)
+
+
+class IsCarOwner(permissions.BasePermission):
     """
-    Custom permission to only allow users that have been in a trip with the user to review them.
+    Custom permission to only allow users that own a car to manage that car.
     """
 
-    def has_permission(self, request, view):
-        reviewed_user_id = view.kwargs['reviewee']
-        reviewed_user = User.objects.get(pk=reviewed_user_id)
-        trip_id = view.kwargs['trip']
-        trip = Trip.objects.get(pk=trip_id)
-        # can't review yourself and need to have been on the trip (as passenger or driver) + same conditions for user reviewed
-        return request.user != reviewed_user and (request.user in trip.passengers.all() or request.user == trip.car.driver) and (reviewed_user in trip.passengers.all() or reviewed_user == trip.car.driver)
+    def has_object_permission(self, request, view, obj):
+        return request.user.car == obj
 
 
 class CarViewSet(viewsets.ModelViewSet):
@@ -114,4 +131,5 @@ class CarViewSet(viewsets.ModelViewSet):
 
     queryset = Car.objects.all()
     serializer_class = CarSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsCarOwner]
+    lookup_field = 'slug'
