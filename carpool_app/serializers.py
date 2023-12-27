@@ -14,7 +14,6 @@ class TripPartSerializer(serializers.ModelSerializer):
 class TripSerializer(serializers.ModelSerializer):
     """Serializer for Trip model"""
     trip_parts = TripPartSerializer(read_only=True, many=True)
-    fee = serializers.IntegerField(required=False)
 
     class Meta:
         """Meta class for TripSerializer"""
