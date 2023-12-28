@@ -29,5 +29,7 @@ This django project is a project for the course M7011E at LTU (Sweden).
    python manage.py runserver
    ```
 
+You can find the documentation at You can find the documentation at [localhost:8000/api/v1/schema/swagger-ui](localhost:8000/api/v1/schema/swagger-ui)
+
 ## Good to know
 There is a second part to this project which can be found [here](https://github.com/AceBasket/carpool-reviews). This is because the project is split into 2 microservices, the microservice deals with the reviews which can be assigned by a user to a trip and another user.
