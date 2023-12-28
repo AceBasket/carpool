@@ -7,8 +7,13 @@ class TripPartSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta class for TripPartsSerializer"""
         model = TripPart
-        exclude = ['slug']
+        exclude = ['slug', 'trip']
         lookup_field = 'slug'
+
+    def create(self, validated_data):
+        validated_data['trip'] = Trip.objects.get(
+            slug=self.context['view'].kwargs['trip_slug'])
+        return super().create(validated_data)
 
 
 class TripSerializer(serializers.ModelSerializer):
@@ -18,8 +23,12 @@ class TripSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta class for TripSerializer"""
         model = Trip
-        exclude = ['slug']
+        exclude = ['slug', 'car']
         lookup_field = 'slug'
+
+    def create(self, validated_data):
+        validated_data['car'] = self.context['request'].user.car
+        return super().create(validated_data)
 
 
 class TripRegistrationSerializer(serializers.ModelSerializer):
@@ -38,5 +47,9 @@ class CarSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta class for CarSerializer"""
         model = Car
-        exclude = ['slug']
+        exclude = ['slug', 'owner']
         lookup_field = 'slug'
+
+    def create(self, validated_data):
+        validated_data['owner'] = self.context['request'].user
+        return super().create(validated_data)

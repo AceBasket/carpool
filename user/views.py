@@ -5,12 +5,46 @@ import pyotp
 from rest_framework_simplejwt.tokens import RefreshToken
 from user.serializers import UserSerializer
 from user.models import User
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    @extend_schema(
+        request=inline_serializer(
+            name='Register',
+            fields={
+                'email': serializers.EmailField(),
+                'password': serializers.CharField(),
+            }
+        ),
+        responses={
+            201: inline_serializer(
+                name='Register-success',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+            400: inline_serializer(
+                name='Register-badrequest',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+            409: inline_serializer(
+                name='Register-conflict',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+        }
+    )
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -22,32 +56,35 @@ class RegisterView(generics.GenericAPIView):
         else:
             return Response({"status": "fail", "message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class LoginView(generics.GenericAPIView):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-
-    def post(self, request):
-        data = request.data
-        email = data.get('email')
-        password = data.get('password')
-
-        user = authenticate(username=email.lower(), password=password)
-
-        if user is None:
-            return Response({"status": "fail", "message": "Incorrect email or password"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not user.check_password(password):
-            return Response({"status": "fail", "message": "Incorrect email or password"}, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = self.serializer_class(user)
-        return Response({"status": "success", "user": serializer.data})
-
-
 class GenerateOTP(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    @extend_schema(
+        request=inline_serializer(
+            name='GenerateOTP',
+            fields={
+                'user_id': serializers.IntegerField(),
+                'email': serializers.EmailField(),
+            }
+        ),
+        responses={
+            200: inline_serializer(
+                name='GenerateOTP-success',
+                fields={
+                    'base32': serializers.CharField(),
+                    'otpauth_url': serializers.URLField(),
+                }
+            ),
+            404: inline_serializer(
+                name='GenerateOTP-error',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+        }
+    )
     def post(self, request):
         data = request.data
         user_id = data.get('user_id', None)
@@ -72,6 +109,45 @@ class VerifyOTP(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    @extend_schema(
+        request=inline_serializer(
+            name='VerifyOTP',
+            fields={
+                'user_id': serializers.IntegerField(),
+                'token': serializers.CharField(min_length=6, max_length=6),
+            }
+        ),
+        responses={
+            200: inline_serializer(
+                name='VerifyOTP-success',
+                fields={
+                    'otp_verified': serializers.BooleanField(),
+                    'user': UserSerializer(),
+                    'token': inline_serializer(
+                        name='Token',
+                        fields={
+                            'refresh': serializers.CharField(),
+                            'access': serializers.CharField(),
+                        }
+                    ),
+                }
+            ),
+            400: inline_serializer(
+                name='VerifyOTP-badrequest',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+            404: inline_serializer(
+                name='VerifyOTP-error',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+        }
+    )
     def post(self, request):
         message = "Token is invalid or user doesn't exist"
         data = request.data
@@ -91,13 +167,51 @@ class VerifyOTP(generics.GenericAPIView):
 
         refresh_token = RefreshToken.for_user(user)
 
-        return Response({'otp_verified': True, "user": serializer.data, "token": {"refresh": str(refresh_token), "access": str(refresh_token.access_token)}})
+        return Response({'otp_verified': True, "user": serializer.data, "token": {"refresh": str(refresh_token), "access": str(refresh_token.access_token)}}, status=status.HTTP_200_OK)
 
 
 class ValidateOTP(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    @extend_schema(
+        request=inline_serializer(
+            name='ValidateOTP',
+            fields={
+                'user_id': serializers.IntegerField(),
+                'token': serializers.CharField(min_length=6, max_length=6),
+            }
+        ),
+        responses={
+            200: inline_serializer(
+                name='ValidateOTP-success',
+                fields={
+                    'otp_valid': serializers.BooleanField(),
+                    'token': inline_serializer(
+                        name='Token',
+                        fields={
+                            'refresh': serializers.CharField(),
+                            'access': serializers.CharField(),
+                        }
+                    ),
+                }
+            ),
+            400: inline_serializer(
+                name='ValidateOTP-badrequest',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+            404: inline_serializer(
+                name='ValidateOTP-error',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+        }
+    )
     def post(self, request):
         message = "Token is invalid or user doesn't exist"
         data = request.data
@@ -116,13 +230,37 @@ class ValidateOTP(generics.GenericAPIView):
 
         refresh_token = RefreshToken.for_user(user)
 
-        return Response({'otp_valid': True, "token": {"refresh": str(refresh_token), "access": str(refresh_token.access_token)}})
+        return Response({'otp_valid': True, "token": {"refresh": str(refresh_token), "access": str(refresh_token.access_token)}}, status=status.HTTP_200_OK)
 
 
 class DisableOTP(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    @extend_schema(
+        request=inline_serializer(
+            name='DisableOTP',
+            fields={
+                'user_id': serializers.IntegerField(),
+            }
+        ),
+        responses={
+            200: inline_serializer(
+                name='DisableOTP-success',
+                fields={
+                    'otp_disabled': serializers.BooleanField(),
+                    'user': UserSerializer(),
+                }
+            ),
+            404: inline_serializer(
+                name='DisableOTP-error',
+                fields={
+                    'status': serializers.CharField(),
+                    'message': serializers.CharField(),
+                }
+            ),
+        }
+    )
     def post(self, request):
         data = request.data
         user_id = data.get('user_id', None)

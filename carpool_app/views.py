@@ -1,11 +1,9 @@
-from rest_framework import viewsets
-from rest_framework import permissions
+from rest_framework import viewsets, permissions, status
 from carpool_app.models import Trip, TripPart, TripRegistration, Car
 from carpool_app.producer import publish
 from carpool_app.serializers import TripSerializer, TripPartSerializer, TripRegistrationSerializer, CarSerializer
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from user.models import User
 
 
 class IsDriver(permissions.BasePermission):
@@ -31,7 +29,7 @@ class IsTripOwnedBy(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if view.action == 'create':
-            trip_slug = view.kwargs['slug']
+            trip_slug = view.kwargs['trip_slug']
             try:
                 trip = Trip.objects.get(slug=trip_slug)
             except Trip.DoesNotExist:
@@ -93,10 +91,12 @@ class TripPartViewSet(viewsets.ModelViewSet):
     API endpoint that allows trip parts to be viewed or edited.
     """
 
-    queryset = TripPart.objects.all().order_by('trip__date', 'departure_time')
     serializer_class = TripPartSerializer
     permission_classes = [permissions.IsAuthenticated, IsDriver, IsTripOwnedBy]
     lookup_field = 'slug'
+
+    def get_queryset(self):
+        return TripPart.objects.all().filter(trip__slug=self.kwargs['trip_slug']).order_by('trip__date', 'departure_time')
 
 
 class TripRegistrationViewSet(viewsets.ModelViewSet):
@@ -134,6 +134,22 @@ class IsCarOwner(permissions.BasePermission):
         return obj.owner == request.user
 
 
+class DoesNotOwnCar(permissions.BasePermission):
+    """
+    Custom permission to only allow users that don't own a car to create a car.
+    """
+    message = "You already own a car"
+
+    def has_permission(self, request, view):
+        if view.action == 'create':
+            try:
+                car = request.user.car
+                return False
+            except Car.DoesNotExist:
+                return True
+        return True
+
+
 class CarViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows cars to be viewed or edited.
@@ -141,5 +157,6 @@ class CarViewSet(viewsets.ModelViewSet):
 
     queryset = Car.objects.all().order_by('license_plate')
     serializer_class = CarSerializer
-    permission_classes = [permissions.IsAuthenticated, IsCarOwner]
+    permission_classes = [
+        permissions.IsAuthenticated, IsCarOwner, DoesNotOwnCar]
     lookup_field = 'slug'

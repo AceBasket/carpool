@@ -30,7 +30,6 @@ class CarDetailTestCase(APITestCase):
         self.assertEqual(response.data['type'], 'type')
         self.assertEqual(response.data['color'], 'color')
         self.assertEqual(response.data['num_passenger_seats'], 4)
-        self.assertEqual(response.data['owner'], self.driver_user.id)
 
     def test_update_car(self):
         """Test the api has car update capability."""
@@ -68,7 +67,6 @@ class CarDetailTestCase(APITestCase):
             'type': 'type',
             'color': 'color',
             'num_passenger_seats': 4,
-            'owner': self.driver_user.id,
         }
         self.client.force_authenticate(user=None)
         response = self.client.put(self.url, payload, format='json')

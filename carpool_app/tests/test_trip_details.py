@@ -30,7 +30,6 @@ class TripDetailTestCase(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['date'], '2020-12-12')
-        self.assertEqual(response.data['car'], self.trip.car.id)
 
     def test_update_trip(self):
         """Test the api has trip update capability."""

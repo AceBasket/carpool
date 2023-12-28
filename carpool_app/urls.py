@@ -15,7 +15,7 @@ router.register(r'cars', views.CarViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path(
-        'trips/<slug:slug>/trip-parts/',
+        'trips/<slug:trip_slug>/trip-parts/',
         views.TripPartViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='trip_part-list'
     ),

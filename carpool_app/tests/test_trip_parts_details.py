@@ -37,7 +37,6 @@ class TripPartDetailTestCase(APITestCase):
         """Test the api has trip_part retrieve capability."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['trip'], self.trip.id)
         self.assertEqual(response.data['departure_time'], '12:00:00')
         self.assertEqual(response.data['distance'], 100)
         self.assertEqual(response.data['duration'], 100)
@@ -48,7 +47,6 @@ class TripPartDetailTestCase(APITestCase):
     def test_update_trip_part(self):
         """Test the api has trip_part update capability."""
         payload = {
-            'trip': self.trip.id,
             'departure_time': '12:00',
             'distance': 100,
             'duration': 100,
