@@ -1,3 +1,4 @@
+from django.template.defaultfilters import slugify
 from django.db import models
 from django.urls import reverse
 from user.models import User
@@ -20,6 +21,11 @@ class Car(models.Model):
     def get_absolute_url(self):
         return reverse('car_detail', kwargs={'slug': self.slug})
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.license_plate)
+        return super().save(*args, **kwargs)
+
 
 class Trip(models.Model):
     """Trip model"""
@@ -40,6 +46,11 @@ class Trip(models.Model):
     def get_absolute_url(self):
         return reverse('trip_detail', kwargs={'slug': self.slug})
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"{self.car.license_plate}_{self.date}")
+        return super().save(*args, **kwargs)
+
 
 class TripRegistration(models.Model):
     """Sign up model"""
@@ -56,6 +67,12 @@ class TripRegistration(models.Model):
 
     def get_absolute_url(self):
         return reverse('trip_registration_detail', kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(
+                f"user{self.user.id}_on_trip_with_{self.trip.car.slug}_on_{self.trip.date}")
+        return super().save(*args, **kwargs)
 
 
 class TripPart(models.Model):
@@ -79,3 +96,9 @@ class TripPart(models.Model):
 
     def get_absolute_url(self):
         return reverse('trip_part_detail', kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(
+                f"{self.trip.slug}_at_{self.departure_time.hour}h{self.departure_time.minute}")
+        return super().save(*args, **kwargs)

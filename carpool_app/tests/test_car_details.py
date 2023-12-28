@@ -18,8 +18,8 @@ class CarDetailTestCase(APITestCase):
                                       type='type',
                                       color='color',
                                       num_passenger_seats=4,
-                                      owner=self.driver_user,
-                                      slug='123456')
+                                      owner=self.driver_user)
+        self.assertEqual(self.car.slug, self.car.license_plate)
         self.url = reverse('car-detail', kwargs={'slug': self.car.slug})
 
     def test_retrieve_car(self):

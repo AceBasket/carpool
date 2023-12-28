@@ -18,15 +18,19 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+api_version = 'v1'
+base_url = f'api/{api_version}/'
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('', include('carpool_app.urls')),
-    path('', include('user.urls')),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path(f'{base_url}admin/', admin.site.urls),
+    path(f'{base_url}schema/', SpectacularAPIView.as_view(), name='schema'),
+    path(f'{base_url}', include('carpool_app.urls')),
+    path(f'{base_url}', include('user.urls')),
+    path(f'{base_url}api-auth/',
+         include('rest_framework.urls', namespace='rest_framework')),
     # Optional UI:
-    path('api/schema/swagger-ui/',
+    path(f'{base_url}schema/swagger-ui/',
          SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/redoc/',
+    path(f'{base_url}schema/redoc/',
          SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]

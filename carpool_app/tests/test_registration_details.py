@@ -19,19 +19,17 @@ class TripRegistrationDetailTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         car = Car.objects.create(license_plate='123456',
                                  owner=self.user,
-                                 num_passenger_seats=4,
-                                 slug='123456')
+                                 num_passenger_seats=4)
         self.trip = Trip.objects.create(date=datetime.date(2020, 12, 12),
-                                        car=car,
-                                        slug='123456_2020-12-12')
+                                        car=car)
         self.trip2 = Trip.objects.create(date=datetime.date(2020, 12, 13),
-                                         car=car,
-                                         slug='123456_2020-12-12-v2')
+                                         car=car)
         self.trip_registration = TripRegistration.objects.create(
             user=self.user,
-            trip=self.trip,
-            slug='test2'
+            trip=self.trip
         )
+        self.assertEqual(self.trip_registration.slug,
+                         "user1_on_trip_with_123456_on_2020-12-12")
         self.url = reverse('registration-detail',
                            kwargs={'slug': self.trip_registration.slug})
 

@@ -20,9 +20,7 @@ class TripPartDetailTestCase(APITestCase):
         self.trip = Trip.objects.create(date=datetime.date(2020, 12, 12),
                                         car=Car.objects.create(license_plate='123456',
                                                                owner=self.user,
-                                                               num_passenger_seats=4,
-                                                               slug='123456'),
-                                        slug='123456_2020-12-12')
+                                                               num_passenger_seats=4))
         self.trip_part = TripPart.objects.create(trip=self.trip,
                                                  departure_time=datetime.time(
                                                      12, 0),
@@ -30,8 +28,8 @@ class TripPartDetailTestCase(APITestCase):
                                                  duration=100,
                                                  fee=100,
                                                  starting_point='A',
-                                                 ending_point='B',
-                                                 slug='123456_2020-12-12_12h00')
+                                                 ending_point='B')
+        self.assertEqual(self.trip_part.slug, "123456_2020-12-12_at_12h0")
         self.url = reverse('trip_part-detail',
                            kwargs={'trip_slug': self.trip.slug, 'slug': self.trip_part.slug})
 

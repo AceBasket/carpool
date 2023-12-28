@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-
+from django.urls import reverse
+from rest_framework.test import APIClient, APITestCase
+from rest_framework import status
 # Create your tests here.
 
 
@@ -47,3 +49,40 @@ class UsersManagersTests(TestCase):
         with self.assertRaises(ValueError):
             user_model.objects.create_superuser(
                 email="super@user.com", password="foo", is_superuser=False)
+
+
+class AuthTestCase(APITestCase):
+    """Test suite for authentication"""
+
+    def setUp(self):
+        """Define the test client and other test variables."""
+        self.client = APIClient()
+
+    def test_register(self):
+        """Test the api has user register capability."""
+        payload = {
+            'email': 'test@test.com',
+            'password': 'test',
+        }
+
+        response = self.client.post(
+            reverse('register'), payload, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_generate_otp(self):
+        """Test the api has user generate OTP and auth URL capability."""
+        user_id = get_user_model().objects.create_user(
+            email='test@test.com',
+            password='test'
+        ).id
+        payload = {
+            'email': 'test@test.com',
+            'user_id': user_id,
+        }
+
+        response = self.client.post(
+            reverse('generate_otp'), payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['base32'])
+        self.assertTrue(response.data['otpauth_url'])

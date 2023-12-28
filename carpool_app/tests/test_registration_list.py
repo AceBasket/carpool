@@ -24,9 +24,7 @@ class TripRegistrationListTestCase(APITestCase):
         trip_id = Trip.objects.create(date=datetime.date(2020, 12, 12),
                                       car=Car.objects.create(license_plate='123456',
                                                              owner=self.user,
-                                                             num_passenger_seats=4,
-                                                             slug='123456'),
-                                      slug='123456_2020-12-12').id
+                                                             num_passenger_seats=4)).id
         payload = {
             'user': self.user.id,
             'trip': trip_id,
@@ -43,10 +41,7 @@ class TripRegistrationListTestCase(APITestCase):
             trip=Trip.objects.create(date=datetime.date(2020, 12, 12),
                                      car=Car.objects.create(license_plate='123456',
                                                             owner=self.user,
-                                                            num_passenger_seats=4,
-                                                            slug='123456'),
-                                     slug='123456_2020-12-12'),
-            slug='test'
+                                                            num_passenger_seats=4))
         )
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -58,9 +53,7 @@ class TripRegistrationListTestCase(APITestCase):
         trip_id = Trip.objects.create(date=datetime.date(2020, 12, 12),
                                       car=Car.objects.create(license_plate='123456',
                                                              owner=self.user,
-                                                             num_passenger_seats=4,
-                                                             slug='123456'),
-                                      slug='123456_2020-12-12').id
+                                                             num_passenger_seats=4)).id
         payload = {
             'user': self.user.id,
             'trip': trip_id,
@@ -77,10 +70,7 @@ class TripRegistrationListTestCase(APITestCase):
             trip=Trip.objects.create(date=datetime.date(2020, 12, 12),
                                      car=Car.objects.create(license_plate='123456',
                                                             owner=self.user,
-                                                            num_passenger_seats=4,
-                                                            slug='123456'),
-                                     slug='123456_2020-12-12'),
-            slug='test'
+                                                            num_passenger_seats=4))
         )
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

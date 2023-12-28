@@ -19,9 +19,9 @@ class TripDetailTestCase(APITestCase):
         self.trip = Trip.objects.create(date=datetime.date(2020, 12, 12),
                                         car=Car.objects.create(license_plate='123456',
                                                                owner=self.user,
-                                                               num_passenger_seats=4,
-                                                               slug='123456'),
-                                        slug='123456_2020-12-12')
+                                                               num_passenger_seats=4)
+                                        )
+        self.assertEqual(self.trip.slug, "123456_2020-12-12")
         self.client.force_authenticate(user=self.user)
         self.url = reverse('trip-detail', kwargs={'slug': self.trip.slug})
 

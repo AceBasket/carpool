@@ -9,7 +9,6 @@ class TripPartSerializer(serializers.ModelSerializer):
         model = TripPart
         exclude = ['slug']
         lookup_field = 'slug'
-        # fields = '__all__'
 
 
 class TripSerializer(serializers.ModelSerializer):
@@ -19,7 +18,6 @@ class TripSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta class for TripSerializer"""
         model = Trip
-        # fields = '__all__'
         exclude = ['slug']
         lookup_field = 'slug'
 
@@ -30,18 +28,12 @@ class TripRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta class for TripRegistrationSerializer"""
         model = TripRegistration
-        # fields = '__all__'
         exclude = ['slug']
         lookup_field = 'slug'
 
 
 class CarSerializer(serializers.ModelSerializer):
     """Serializer for Car model"""
-
-    def create(self, validated_data):
-        # slugify license plate
-        validated_data['slug'] = validated_data['license_plate']
-        return super().create(validated_data)
 
     class Meta:
         """Meta class for CarSerializer"""

@@ -69,30 +69,30 @@ class TripPartListTestCase(APITestCase):
 
     def test_list_trip_parts(self):
         """Test the api has trip_part list capability."""
-        trip_part = TripPart.objects.create(trip=self.trip,
-                                            departure_time=datetime.time(
-                                                12, 0),
-                                            distance=100,
-                                            duration=100,
-                                            fee=100,
-                                            starting_point='A',
-                                            ending_point='B',
-                                            slug='123456_2020-12-12_12:00')
+        TripPart.objects.create(trip=self.trip,
+                                departure_time=datetime.time(
+                                    12, 0),
+                                distance=100,
+                                duration=100,
+                                fee=100,
+                                starting_point='A',
+                                ending_point='B',
+                                slug='123456_2020-12-12_12:00')
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 1)
 
     def test_list_trip_parts_unauthenticated(self):
         """Test the api has trip_part list capability."""
-        trip_part = TripPart.objects.create(trip=self.trip,
-                                            departure_time=datetime.time(
-                                                12, 0),
-                                            distance=100,
-                                            duration=100,
-                                            fee=100,
-                                            starting_point='A',
-                                            ending_point='B',
-                                            slug='123456_2020-12-12_12:00')
+        TripPart.objects.create(trip=self.trip,
+                                departure_time=datetime.time(
+                                    12, 0),
+                                distance=100,
+                                duration=100,
+                                fee=100,
+                                starting_point='A',
+                                ending_point='B',
+                                slug='123456_2020-12-12_12:00')
         self.client.force_authenticate(user=None)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
